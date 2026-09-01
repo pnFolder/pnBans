@@ -32,7 +32,7 @@ import ru.privatenull.pnlibrary.update.UpdateSettings;
 
 public final class PnBansPlugin extends JavaPlugin {
     private static final String SUPPORT_URL = "https://discord.gg/rRbzq6cnc6";
-    private static final String GITHUB_REPOSITORY = "Dy6HiLa/pnBans";
+    private static final String GITHUB_REPOSITORY = "pnFolder/pnBans";
     private static final int BSTATS_PLUGIN_ID = 32598;
 
     private DatabaseBackend database;
