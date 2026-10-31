@@ -3,7 +3,9 @@ version: '${version}'
 main: ru.privatenull.pnbans.PnBansPlugin
 api-version: '1.21'
 authors: [privatenull]
+website: https://github.com/pnFolder/pnBans
 description: Moderation system with audit history and DupeIP checks
+softdepend: [pnLibrary]
 commands:
   ban:
     usage: /ban <ник> <время> <правило|причина> [-s]
@@ -38,19 +40,51 @@ commands:
   pnbans:
     usage: /pnbans reload
 permissions:
-  pnbans.ban: { default: op }
-  pnbans.unban: { default: op }
-  pnbans.ban.ip: { default: op }
-  pnbans.unban.ip: { default: op }
-  pnbans.mute: { default: op }
-  pnbans.unmute: { default: op }
-  pnbans.warn: { default: op }
-  pnbans.unwarn: { default: op }
-  pnbans.history: { default: op }
-  pnbans.dupeip: { default: op }
-  pnbans.dupeip.alert: { default: op }
-  pnbans.dupeip.bypass: { default: false }
-  pnbans.admin: { default: op }
-  pnbans.notify: { default: op }
-  pnbans.exempt: { default: false }
-  pnbans.mute.bypass: { default: false }
+  pnbans.ban:
+    description: Банить игроков
+    default: op
+  pnbans.unban:
+    description: Снимать баны
+    default: op
+  pnbans.ban.ip:
+    description: Банить по IP
+    default: op
+  pnbans.unban.ip:
+    description: Снимать IP-баны
+    default: op
+  pnbans.mute:
+    description: Выдавать муты
+    default: op
+  pnbans.unmute:
+    description: Снимать муты
+    default: op
+  pnbans.warn:
+    description: Выдавать предупреждения
+    default: op
+  pnbans.unwarn:
+    description: Снимать предупреждения
+    default: op
+  pnbans.history:
+    description: Смотреть историю наказаний
+    default: op
+  pnbans.dupeip:
+    description: Проверять связи аккаунтов (DupeIP)
+    default: op
+  pnbans.dupeip.alert:
+    description: Получать оповещения DupeIP
+    default: op
+  pnbans.dupeip.bypass:
+    description: Не попадать под проверки DupeIP
+    default: false
+  pnbans.admin:
+    description: Меню /pnbans, перезагрузка и уведомления об обновлениях
+    default: op
+  pnbans.notify:
+    description: Видеть тихие наказания и служебные уведомления
+    default: op
+  pnbans.exempt:
+    description: Иммунитет к наказаниям
+    default: false
+  pnbans.mute.bypass:
+    description: Писать в чат под мутом
+    default: false

@@ -10,7 +10,7 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.Updates;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import ru.privatenull.pnlibrary.database.MongoDatabaseManager;
+import ru.privatenull.pnbans.support.database.MongoDatabaseManager;
 import ru.privatenull.pnbans.model.AccountIpRecord;
 import ru.privatenull.pnbans.model.AccountProfile;
 import ru.privatenull.pnbans.model.Punishment;

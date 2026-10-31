@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.command.CommandSender;
-import ru.privatenull.pnlibrary.text.ColorUtil;
+import ru.privatenull.pnbans.support.text.ColorUtil;
 import ru.privatenull.pnbans.PnBansPlugin;
 
 import java.util.HashMap;

@@ -16,12 +16,12 @@ import ru.privatenull.pnbans.gui.HistoryGui;
 import ru.privatenull.pnbans.gui.StaffGui;
 import ru.privatenull.pnbans.limit.ModerationLimitService;
 import ru.privatenull.pnbans.model.Punishment;
+import ru.privatenull.pnbans.integration.PnLibraryRuntime;
 import ru.privatenull.pnbans.model.PunishmentType;
 import ru.privatenull.pnbans.storage.PunishmentService;
 import ru.privatenull.pnbans.util.DurationParser;
 import ru.privatenull.pnbans.util.MessageUtil;
 import ru.privatenull.pnbans.util.TimeFormat;
-import ru.privatenull.pnlibrary.update.UpdateChecker;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -284,22 +284,10 @@ public final class ModerationCommand implements CommandExecutor, TabCompleter {
     }
 
     private MenuUpdateInfo menuUpdateInfo(String current) {
-        UpdateChecker checker = plugin.getUpdateChecker();
-        if (checker == null || !checker.isCheckCompleted()) {
-            return new MenuUpdateInfo("&7проверяется", "неизвестно", "");
-        }
-        if (checker.isUpdateAvailable()) {
-            String latest = knownOrUnknown(checker.getLatestVersion());
-            return new MenuUpdateInfo(
-                    "&eдоступно &f" + current + " &8→ &#D8DF9D" + latest,
-                    latest,
-                    knownOrUnknown(checker.getDownloadUrl())
-            );
-        }
-        if (checker.getLastError() != null && !checker.getLastError().isBlank()) {
-            return new MenuUpdateInfo("&cошибка проверки", knownOrUnknown(checker.getLatestVersion()), "");
-        }
-        return new MenuUpdateInfo("&aпоследняя версия", knownOrUnknown(checker.getLatestVersion()), "");
+        PnLibraryRuntime runtime = plugin.getPnRuntime();
+        if (runtime == null) return new MenuUpdateInfo("&7проверяется", "неизвестно", "");
+        PnLibraryRuntime.UpdateInfo info = runtime.updateInfo(current);
+        return new MenuUpdateInfo(info.status(), info.latest(), info.download());
     }
 
     private Input parseInput(CommandSender sender, String[] args, PunishmentType type, String usage) {

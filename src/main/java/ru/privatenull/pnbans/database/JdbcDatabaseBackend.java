@@ -1,8 +1,8 @@
 package ru.privatenull.pnbans.database;
 
-import ru.privatenull.pnlibrary.database.DatabaseType;
-import ru.privatenull.pnlibrary.database.JdbcDatabase;
-import ru.privatenull.pnlibrary.database.JdbcMigration;
+import ru.privatenull.pnbans.support.database.DatabaseType;
+import ru.privatenull.pnbans.support.database.JdbcDatabase;
+import ru.privatenull.pnbans.support.database.JdbcMigration;
 import ru.privatenull.pnbans.model.AccountIpRecord;
 import ru.privatenull.pnbans.model.AccountProfile;
 import ru.privatenull.pnbans.model.Punishment;

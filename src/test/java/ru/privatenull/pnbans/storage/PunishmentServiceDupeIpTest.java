@@ -2,8 +2,8 @@ package ru.privatenull.pnbans.storage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import ru.privatenull.pnlibrary.database.JdbcDatabase;
-import ru.privatenull.pnlibrary.database.JdbcSettings;
+import ru.privatenull.pnbans.support.database.JdbcDatabase;
+import ru.privatenull.pnbans.support.database.JdbcSettings;
 import ru.privatenull.pnbans.database.JdbcDatabaseBackend;
 import ru.privatenull.pnbans.model.Punishment;
 import ru.privatenull.pnbans.model.PunishmentType;
