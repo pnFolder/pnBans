@@ -14,12 +14,22 @@ repositories {
     }
 }
 
+def pnLibraryVersion = '0.0.1-dev.6'
+
 dependencies {
     compileOnly 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
-    implementation 'ru.privatenull:pnLibrary:1.0.0'
-    implementation 'org.bstats:bstats-bukkit:3.2.1'
+    // The shared runtime plugin is installed by the pnLibrary bootstrap shaded into the jar;
+    // only its public API is needed to compile.
+    implementation "io.github.pnfolder:pnlibrary-bootstrap-bukkit:${pnLibraryVersion}"
+    compileOnly "io.github.pnfolder:pnlibrary-api:${pnLibraryVersion}"
+    testImplementation "io.github.pnfolder:pnlibrary-api:${pnLibraryVersion}"
+    implementation 'org.mongodb:mongodb-driver-sync:5.2.1'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+    implementation 'org.xerial:sqlite-jdbc:3.47.1.0'
+    implementation 'com.mysql:mysql-connector-j:9.1.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testImplementation 'org.yaml:snakeyaml:2.3'
+    testImplementation 'io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT'
 }
 
 java {
@@ -33,6 +43,10 @@ tasks.withType(JavaCompile).configureEach {
     options.release = 21
 }
 
+configurations.configureEach {
+    attributes.attribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 21)
+}
+
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
@@ -40,8 +54,14 @@ tasks.withType(Test).configureEach {
 tasks.shadowJar {
     archiveClassifier.set('')
     mergeServiceFiles()
-    relocate 'ru.privatenull.pnlibrary', 'ru.privatenull.pnbans.libs.pnlibrary'
-    relocate 'org.bstats', 'ru.privatenull.pnbans.libs.bstats'
+    // Runtime services (lifecycle, updates, metrics, logging) belong to the installed pnLibrary plugin.
+    relocate 'org.pnfolder.pnlibrary.bootstrap', 'ru.privatenull.pnbans.libs.pnbootstrap'
+    relocate 'org.pnfolder.pnlibrary.bukkit.bootstrap', 'ru.privatenull.pnbans.libs.pnbootstrap.bukkit'
+    relocate 'org.pnfolder.pnlibrary.console', 'ru.privatenull.pnbans.libs.pnbootstrap.console'
+}
+
+tasks.jar {
+    archiveClassifier.set('plain')
 }
 
 tasks.build {

@@ -4,13 +4,15 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.SimplePie;
-import ru.privatenull.pnlibrary.database.DatabaseSettings;
-import ru.privatenull.pnlibrary.database.JdbcDatabase;
-import ru.privatenull.pnlibrary.database.JdbcSettings;
-import ru.privatenull.pnlibrary.database.MongoDatabaseManager;
-import ru.privatenull.pnlibrary.database.MongoSettings;
+import org.pnfolder.pnlibrary.bukkit.bootstrap.PnLibraryBootstrap;
+import ru.privatenull.pnbans.bootstrap.PnLibraryLifecycleListener;
+import ru.privatenull.pnbans.integration.PnLibraryRuntime;
+import ru.privatenull.pnbans.support.database.DatabaseSettings;
+import ru.privatenull.pnbans.support.database.DatabaseType;
+import ru.privatenull.pnbans.support.database.JdbcDatabase;
+import ru.privatenull.pnbans.support.database.JdbcSettings;
+import ru.privatenull.pnbans.support.database.MongoDatabaseManager;
+import ru.privatenull.pnbans.support.database.MongoSettings;
 import ru.privatenull.pnbans.command.ModerationCommand;
 import ru.privatenull.pnbans.api.PnBansMuteApi;
 import ru.privatenull.pnbans.api.PnBansMuteApiImpl;
@@ -26,14 +28,9 @@ import ru.privatenull.pnbans.limit.ModerationLimitService;
 import ru.privatenull.pnbans.listener.DupeIpListener;
 import ru.privatenull.pnbans.listener.PunishmentListener;
 import ru.privatenull.pnbans.storage.PunishmentService;
-import ru.privatenull.pnlibrary.lifecycle.PluginBanner;
-import ru.privatenull.pnlibrary.update.UpdateChecker;
-import ru.privatenull.pnlibrary.update.UpdateSettings;
 
 public final class PnBansPlugin extends JavaPlugin {
     private static final String SUPPORT_URL = "https://discord.gg/rRbzq6cnc6";
-    private static final String GITHUB_REPOSITORY = "pnFolder/pnBans";
-    private static final int BSTATS_PLUGIN_ID = 32598;
 
     private DatabaseBackend database;
     private PunishmentService punishmentService;
@@ -42,13 +39,37 @@ public final class PnBansPlugin extends JavaPlugin {
     private ModerationLimitService moderationLimits;
     private HistoryGui historyGui;
     private StaffGui staffGui;
-    private UpdateChecker updateChecker;
+    private boolean pnLibraryReady;
+    private PnLibraryRuntime pnRuntime;
     private DupeIpService dupeIpService;
     private DupeIpGui dupeIpGui;
     private FileConfiguration messages;
 
     @Override
+    public void onLoad() {
+        try {
+            pnLibraryReady = PnLibraryBootstrap.ensureInstalled(this, PnLibraryRuntime.MINIMUM_VERSION);
+        } catch (Throwable failure) {
+            getLogger().log(java.util.logging.Level.SEVERE,
+                    "Не удалось автоматически подготовить pnLibrary. pnBans не будет запущен.", failure);
+        }
+    }
+
+    @Override
     public void onEnable() {
+        if (!pnLibraryReady) {
+            getLogger().severe("pnLibrary не подготовлена: проверьте доступ к GitHub и ошибку загрузки выше.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        try {
+            pnRuntime = PnLibraryRuntime.connect(this);
+        } catch (Throwable failure) {
+            getLogger().log(java.util.logging.Level.SEVERE, "pnLibrary не удалось включить или подключить к pnBans.", failure);
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        getServer().getPluginManager().registerEvents(new PnLibraryLifecycleListener(this), this);
         saveDefaultConfig();
         loadMessages();
         try {
@@ -89,34 +110,33 @@ public final class PnBansPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(dupeIpListener, this);
         for (org.bukkit.entity.Player online : getServer().getOnlinePlayers()) dupeIpListener.scan(online);
         getServer().getServicesManager().register(PnBansMuteApi.class, new PnBansMuteApiImpl(punishmentService), this, org.bukkit.plugin.ServicePriority.Normal);
-        updateChecker = new UpdateChecker(this, updateSettings());
-        updateChecker.start();
-        Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
-        metrics.addCustomChart(new SimplePie("database_type", () ->
-                ru.privatenull.pnlibrary.database.DatabaseType.parse(
-                        getConfig().getString("database.type", "SQLITE")
-                ).name()));
-        getServer().getPluginManager().registerEvents(new org.bukkit.event.Listener() {
-            @org.bukkit.event.EventHandler
-            public void onJoin(org.bukkit.event.player.PlayerJoinEvent event) { updateChecker.notifyAdminOnJoin(event.getPlayer()); }
-        }, this);
-        PluginBanner.enabled(this, SUPPORT_URL);
+        String databaseType = databaseTypeName();
+        pnRuntime.register(() -> databaseType, () -> java.util.Map.of(
+                "database", databaseType,
+                "version", getDescription().getVersion()));
+        pnRuntime.enabled(databaseType);
     }
 
     @Override
     public void onDisable() {
-        if (updateChecker != null) updateChecker.cancel();
         if (punishmentEffects != null) punishmentEffects.shutdown();
         getServer().getServicesManager().unregisterAll(this);
         if (database != null) database.close();
-        PluginBanner.disabled(this, SUPPORT_URL);
+        PnLibraryRuntime closing = pnRuntime;
+        pnRuntime = null;
+        if (closing != null) {
+            try {
+                closing.close();
+            } catch (Exception exception) {
+                getLogger().log(java.util.logging.Level.WARNING, "Не удалось корректно закрыть контекст pnLibrary", exception);
+            }
+        }
     }
 
     public void reloadPlugin() {
         reloadConfig();
         loadMessages();
         if (punishmentListener != null) punishmentListener.reload();
-        if (updateChecker != null) updateChecker.restart(updateSettings());
     }
 
     public PunishmentService getPunishmentService() {
@@ -127,8 +147,12 @@ public final class PnBansPlugin extends JavaPlugin {
         return messages;
     }
 
-    public UpdateChecker getUpdateChecker() {
-        return updateChecker;
+    public PnLibraryRuntime getPnRuntime() {
+        return pnRuntime;
+    }
+
+    private String databaseTypeName() {
+        return DatabaseType.parse(getConfig().getString("database.type", "SQLITE")).name();
     }
 
     public String getSupportDiscord() {
@@ -148,16 +172,6 @@ public final class PnBansPlugin extends JavaPlugin {
         } catch (java.io.IOException exception) {
             getLogger().warning("Could not load messages.yml defaults: " + exception.getMessage());
         }
-    }
-
-    private UpdateSettings updateSettings() {
-        return new UpdateSettings(
-                true,
-                GITHUB_REPOSITORY,
-                "pnbans.admin",
-                6L,
-                SUPPORT_URL
-        );
     }
 
     private DatabaseBackend createDatabase() {
