@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.gui;
 
+import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -68,7 +69,7 @@ public final class HistoryGui implements Listener {
             inventory.setItem(50, GuiNavigation.next(page, hasNextPage));
             player.openInventory(inventory);
         } catch (Exception exception) {
-            plugin.getLogger().warning("Could not open history GUI: " + exception.getMessage());
+            Log.error("Could not open history GUI", exception);
             MessageUtil.send(plugin, player, "history-load-error", java.util.Map.of());
         }
     }

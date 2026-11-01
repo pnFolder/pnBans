@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.listener;
 
+import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -53,7 +54,7 @@ public final class DupeIpListener implements Listener {
                 if (!analysis.shouldAlert()) return;
                 Bukkit.getScheduler().runTask(plugin, () -> notifyStaff(analysis));
             } catch (Exception exception) {
-                plugin.getLogger().warning("DupeIP check failed for " + name + ": " + exception.getMessage());
+                Log.error("DupeIP check failed for " + name + "", exception);
             }
         });
     }

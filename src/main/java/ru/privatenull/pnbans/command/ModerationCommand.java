@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.command;
 
+import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -465,7 +466,7 @@ public final class ModerationCommand implements CommandExecutor, TabCompleter {
     }
 
     private void databaseError(CommandSender sender, Exception exception) {
-        plugin.getLogger().warning("Database operation failed: " + exception.getMessage());
+        Log.error("Database operation failed", exception);
         message(sender, "database-error", Map.of());
     }
 

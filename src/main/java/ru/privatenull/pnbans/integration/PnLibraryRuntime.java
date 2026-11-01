@@ -76,6 +76,7 @@ public final class PnLibraryRuntime {
                             .channel(UpdateChannel.STABLE)
                             .automaticDownload(false)
                             .artifact("(?i)^pnBans-[0-9].*\\.jar$", 21)));
+            Log.bind(owner, module);
         } catch (RuntimeException failure) {
             closeRegistration();
             throw failure;
@@ -137,6 +138,7 @@ public final class PnLibraryRuntime {
     }
 
     private void closeRegistration() {
+        Log.unbind();
         PluginRegistration closing = registration;
         registration = null;
         if (closing != null && !closing.isClosed()) closing.close();

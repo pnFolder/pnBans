@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.gui;
 
+import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -54,7 +55,7 @@ public final class DupeIpGui implements Listener {
                 DupeIpService.Analysis analysis = service.analyze(uuid, name);
                 Bukkit.getScheduler().runTask(plugin, () -> openLoaded(viewer, analysis, requestedPage));
             } catch (Exception exception) {
-                plugin.getLogger().warning("Could not open DupeIP GUI: " + exception.getMessage());
+                Log.error("Could not open DupeIP GUI", exception);
                 Bukkit.getScheduler().runTask(plugin, () -> MessageUtil.send(plugin, viewer, "dupeip-load-error", java.util.Map.of()));
             }
         });

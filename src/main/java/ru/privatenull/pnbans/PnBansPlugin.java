@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans;
 
+import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -50,22 +51,21 @@ public final class PnBansPlugin extends JavaPlugin {
         try {
             pnLibraryReady = PnLibraryBootstrap.ensureInstalled(this, PnLibraryRuntime.MINIMUM_VERSION);
         } catch (Throwable failure) {
-            getLogger().log(java.util.logging.Level.SEVERE,
-                    "Не удалось автоматически подготовить pnLibrary. pnBans не будет запущен.", failure);
+            Log.error("Не удалось автоматически подготовить pnLibrary. pnBans не будет запущен.", failure);
         }
     }
 
     @Override
     public void onEnable() {
         if (!pnLibraryReady) {
-            getLogger().severe("pnLibrary не подготовлена: проверьте доступ к GitHub и ошибку загрузки выше.");
+            Log.error("pnLibrary не подготовлена: проверьте доступ к GitHub и ошибку загрузки выше.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
         try {
             pnRuntime = PnLibraryRuntime.connect(this);
         } catch (Throwable failure) {
-            getLogger().log(java.util.logging.Level.SEVERE, "pnLibrary не удалось включить или подключить к pnBans.", failure);
+            Log.error("pnLibrary не удалось включить или подключить к pnBans.", failure);
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -77,7 +77,7 @@ public final class PnBansPlugin extends JavaPlugin {
             database.open();
             punishmentService = new PunishmentService(database);
         } catch (Exception exception) {
-            getLogger().severe("pnBans could not connect to the database: " + exception.getMessage());
+            Log.error("pnBans could not connect to the database", exception);
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
@@ -128,7 +128,7 @@ public final class PnBansPlugin extends JavaPlugin {
             try {
                 closing.close();
             } catch (Exception exception) {
-                getLogger().log(java.util.logging.Level.WARNING, "Не удалось корректно закрыть контекст pnLibrary", exception);
+                Log.error("Не удалось корректно закрыть контекст pnLibrary", exception);
             }
         }
     }
@@ -170,7 +170,7 @@ public final class PnBansPlugin extends JavaPlugin {
                 messages.setDefaults(defaults);
             }
         } catch (java.io.IOException exception) {
-            getLogger().warning("Could not load messages.yml defaults: " + exception.getMessage());
+            Log.error("Could not load messages.yml defaults", exception);
         }
     }
 
