@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import ru.privatenull.pnbans.PnBansPlugin;
 
-/** Keeps pnCases from outliving the shared runtime during shutdown or manual unload. */
+/** Keeps pnBans from outliving the shared runtime during shutdown or manual unload. */
 public final class PnLibraryLifecycleListener implements Listener {
 
     private final PnBansPlugin plugin;
@@ -19,7 +19,7 @@ public final class PnLibraryLifecycleListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPluginDisable(PluginDisableEvent event) {
         if (!event.getPlugin().getName().equalsIgnoreCase("pnLibrary") || !plugin.isEnabled()) return;
-        Log.warning("pnLibrary отключается; pnCases будет безопасно остановлен первым.");
+        Log.warning("pnLibrary отключается; pnBans будет безопасно остановлен первым.");
         plugin.getServer().getPluginManager().disablePlugin(plugin);
     }
 }
