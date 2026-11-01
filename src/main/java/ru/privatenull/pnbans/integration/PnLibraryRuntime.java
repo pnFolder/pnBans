@@ -91,13 +91,13 @@ public final class PnLibraryRuntime {
                 .ok("API", "PnBansMuteApi опубликован");
         if (owner.getServer().getPluginManager().isPluginEnabled("pnChat")) report.ok("pnChat", "проверяет муты");
         else report.skip("pnChat", "не установлен");
-        report.ok("Диагностика", "/pndebug pnbans").show();
+        report.ok("Диагностика", "/pn debug pnbans").show();
     }
 
     private void stoppedOn(ModuleContext closing) {
         closing.getLifecycle().disabled()
                 .ok("Хранилище", "соединение закрыто")
-                .ok("Диагностика", "/pndebug pnbans")
+                .ok("Диагностика", "/pn debug pnbans")
                 .show();
     }
 
