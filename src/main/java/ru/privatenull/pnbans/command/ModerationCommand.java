@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.command;
 
+import ru.privatenull.pnbans.integration.Tasks;
 import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -217,12 +218,12 @@ public final class ModerationCommand implements CommandExecutor, TabCompleter {
             dupeIpGui.open(player, target.uuid(), target.name());
         } else {
             message(sender, "dupeip-loading", Map.of("player", target.name()));
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Tasks.async(() -> {
                 try {
                     DupeIpService.Analysis analysis = dupeIpService.analyze(target.uuid(), target.name());
-                    Bukkit.getScheduler().runTask(plugin, () -> sendDupeIpReport(sender, analysis));
+                    Tasks.sync(() -> sendDupeIpReport(sender, analysis));
                 } catch (Exception exception) {
-                    Bukkit.getScheduler().runTask(plugin, () -> databaseError(sender, exception));
+                    Tasks.sync(() -> databaseError(sender, exception));
                 }
             });
         }

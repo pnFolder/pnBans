@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.gui;
 
+import ru.privatenull.pnbans.integration.Tasks;
 import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -12,7 +13,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitTask;
+import org.pnfolder.pnlibrary.api.tasks.TaskHandle;
 import ru.privatenull.pnbans.PnBansPlugin;
 import ru.privatenull.pnbans.dupeip.DupeIpService;
 import ru.privatenull.pnbans.model.AccountProfile;
@@ -50,13 +51,13 @@ public final class DupeIpGui implements Listener {
     }
 
     private void load(Player viewer, UUID uuid, String name, int requestedPage) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Tasks.async(() -> {
             try {
                 DupeIpService.Analysis analysis = service.analyze(uuid, name);
-                Bukkit.getScheduler().runTask(plugin, () -> openLoaded(viewer, analysis, requestedPage));
+                Tasks.sync(() -> openLoaded(viewer, analysis, requestedPage));
             } catch (Exception exception) {
                 Log.error("Could not open DupeIP GUI", exception);
-                Bukkit.getScheduler().runTask(plugin, () -> MessageUtil.send(plugin, viewer, "dupeip-load-error", java.util.Map.of()));
+                Tasks.sync(() -> MessageUtil.send(plugin, viewer, "dupeip-load-error", java.util.Map.of()));
             }
         });
     }
@@ -145,26 +146,26 @@ public final class DupeIpGui implements Listener {
     }
 
     private void startAutoRefresh(Player viewer, DupeHolder holder) {
-        BukkitTask task = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+        TaskHandle task = Tasks.syncTimer(AUTO_REFRESH_TICKS, AUTO_REFRESH_TICKS, () -> {
             if (!isOpen(viewer, holder)) {
                 holder.stopAutoRefresh();
                 return;
             }
             if (!holder.beginRefresh()) return;
             DupeIpService.Analysis current = holder.analysis();
-            Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            Tasks.async(() -> {
                 try {
                     DupeIpService.Analysis refreshed = service.analyze(current.uuid(), current.name());
-                    Bukkit.getScheduler().runTask(plugin, () -> {
+                    Tasks.sync(() -> {
                         holder.finishRefresh();
                         if (isOpen(viewer, holder)) render(holder, refreshed, holder.page(), false);
                     });
                 } catch (Exception exception) {
                     plugin.getLogger().fine("Could not refresh DupeIP GUI: " + exception.getMessage());
-                    Bukkit.getScheduler().runTask(plugin, holder::finishRefresh);
+                    Tasks.sync(holder::finishRefresh);
                 }
             });
-        }, AUTO_REFRESH_TICKS, AUTO_REFRESH_TICKS);
+        });
         holder.setAutoRefreshTask(task);
     }
 
@@ -189,7 +190,7 @@ public final class DupeIpGui implements Listener {
 
     private void openHistory(Player player, UUID uuid, String name) {
         player.closeInventory();
-        Bukkit.getScheduler().runTask(plugin, () -> historyGui.open(player, uuid, name, 0));
+        Tasks.sync(() -> historyGui.open(player, uuid, name, 0));
     }
 
     private ItemStack summaryItem(DupeIpService.Analysis analysis, int page, int lastPage) {
@@ -297,7 +298,7 @@ public final class DupeIpGui implements Listener {
         private int page;
         private boolean hasNextPage;
         private boolean refreshing;
-        private BukkitTask autoRefreshTask;
+        private TaskHandle autoRefreshTask;
         private Inventory inventory;
 
         private DupeHolder(DupeIpService.Analysis analysis) {
@@ -332,7 +333,7 @@ public final class DupeIpGui implements Listener {
             refreshing = false;
         }
 
-        private void setAutoRefreshTask(BukkitTask task) {
+        private void setAutoRefreshTask(TaskHandle task) {
             if (autoRefreshTask != null) autoRefreshTask.cancel();
             autoRefreshTask = task;
         }

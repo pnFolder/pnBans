@@ -13,23 +13,25 @@ import ru.privatenull.pnbans.util.TimeFormat;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import ru.privatenull.pnbans.integration.Cooldowns;
 import java.util.concurrent.ConcurrentHashMap;
 
 /** Configurable cooldowns and maximum durations. Vault is detected by reflection, so it remains optional. */
 public final class ModerationLimitService {
     private final PnBansPlugin plugin;
-    private final Map<UUID, Map<PunishmentType, Long>> lastUse = new ConcurrentHashMap<>();
     public ModerationLimitService(PnBansPlugin plugin) { this.plugin = plugin; }
     public Result validate(CommandSender sender, PunishmentType type, DurationParser.DurationValue requested) {
         if (!(sender instanceof Player player)) return Result.pass();
         Rule rule = ruleFor(player, type);
         long requestedMs = requested.duration().toMillis();
         if (rule.maxDurationMs > 0 && requestedMs > rule.maxDurationMs) return Result.tooLong(TimeFormat.duration(new DurationParser.DurationValue(java.time.Duration.ofMillis(rule.maxDurationMs), rule.maxDurationText)));
-        long previous = lastUse.getOrDefault(player.getUniqueId(), Map.of()).getOrDefault(type, 0L);
-        long remaining = rule.cooldownMs - (System.currentTimeMillis() - previous);
+        long remaining = Cooldowns.remainingMillis(player.getUniqueId(), cooldownAction(type));
         return remaining > 0 ? Result.cooldown(TimeFormat.remaining(System.currentTimeMillis() + remaining, System.currentTimeMillis())) : Result.pass();
     }
-    public void record(CommandSender sender, PunishmentType type) { if (sender instanceof Player player) lastUse.computeIfAbsent(player.getUniqueId(), ignored -> new ConcurrentHashMap<>()).put(type, System.currentTimeMillis()); }
+    public void record(CommandSender sender, PunishmentType type) {
+        if (sender instanceof Player player) Cooldowns.set(player.getUniqueId(), cooldownAction(type), ruleFor(player, type).cooldownMs);
+    }
+    private static String cooldownAction(PunishmentType type) { return "moderation-" + type.name().toLowerCase(Locale.ROOT); }
     private Rule ruleFor(Player player, PunishmentType type) {
         String group = vaultGroup(player);
         ConfigurationSection root = plugin.getConfig().getConfigurationSection("moderation-limits.vault-groups." + group);

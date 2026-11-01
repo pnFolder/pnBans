@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.listener;
 
+import ru.privatenull.pnbans.integration.Tasks;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -57,7 +58,7 @@ public final class PunishmentListener implements Listener {
         event.setCancelled(true);
         String message = mutedMessage.replace("{remaining}", TimeFormat.remaining(mute.expiresAt(), System.currentTimeMillis()))
                 .replace("{reason}", mute.reason());
-        plugin.getServer().getScheduler().runTask(plugin, () -> { if (player.isOnline()) { player.sendMessage(MessageUtil.color(message)); effects.muteAttempt(player); } });
+        Tasks.sync(() -> { if (player.isOnline()) { player.sendMessage(MessageUtil.color(message)); effects.muteAttempt(player); } });
     }
 
     private String banMessage(Punishment punishment) {

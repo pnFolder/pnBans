@@ -1,5 +1,6 @@
 package ru.privatenull.pnbans.listener;
 
+import ru.privatenull.pnbans.integration.Tasks;
 import ru.privatenull.pnbans.integration.Log;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -48,11 +49,11 @@ public final class DupeIpListener implements Listener {
         double x = location.getX();
         double y = location.getY();
         double z = location.getZ();
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        Tasks.async(() -> {
             try {
                 DupeIpService.Analysis analysis = service.recordAndAnalyze(uuid, name, ip, world, x, y, z);
                 if (!analysis.shouldAlert()) return;
-                Bukkit.getScheduler().runTask(plugin, () -> notifyStaff(analysis));
+                Tasks.sync(() -> notifyStaff(analysis));
             } catch (Exception exception) {
                 Log.error("DupeIP check failed for " + name + "", exception);
             }
