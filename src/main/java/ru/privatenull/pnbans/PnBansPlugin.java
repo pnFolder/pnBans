@@ -114,7 +114,7 @@ public final class PnBansPlugin extends JavaPlugin {
         pnRuntime.register(() -> databaseType, () -> java.util.Map.of(
                 "database", databaseType,
                 "version", getDescription().getVersion()));
-        pnRuntime.enabled(databaseType);
+        pnRuntime.started(databaseType, 11);
     }
 
     @Override

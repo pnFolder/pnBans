@@ -3,6 +3,7 @@ package ru.privatenull.pnbans.integration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pnfolder.pnlibrary.api.diagnostics.DiagnosticConfiguration;
 import org.pnfolder.pnlibrary.api.diagnostics.DiagnosticContainer;
+import org.pnfolder.pnlibrary.api.logging.MessageBox;
 import org.pnfolder.pnlibrary.api.plugin.ModuleContext;
 import org.pnfolder.pnlibrary.api.plugin.PluginRegistration;
 import org.pnfolder.pnlibrary.api.remote.PolicyErrorAction;
@@ -81,10 +82,22 @@ public final class PnLibraryRuntime {
         }
     }
 
-    public void enabled(String databaseType) {
+    public void started(String databaseType, int commands) {
         if (module == null) return;
-        module.getLifecycle().enabled()
+        MessageBox report = module.getLifecycle().enabled()
                 .ok("Хранилище", databaseType)
+                .ok("Наказания", "баны, муты, предупреждения, поиск дублей IP")
+                .ok("Команды", commands + " зарегистрировано")
+                .ok("API", "PnBansMuteApi опубликован");
+        if (owner.getServer().getPluginManager().isPluginEnabled("pnChat")) report.ok("pnChat", "проверяет муты");
+        else report.skip("pnChat", "не установлен");
+        report.ok("Диагностика", "/pndebug pnbans").show();
+    }
+
+    private void stoppedOn(ModuleContext closing) {
+        closing.getLifecycle().disabled()
+                .ok("Хранилище", "соединение закрыто")
+                .ok("Диагностика", "/pndebug pnbans")
                 .show();
     }
 
@@ -115,7 +128,7 @@ public final class PnLibraryRuntime {
         module = null;
         if (closing != null && !closing.isClosed()) {
             try {
-                closing.getLifecycle().disabled().show();
+                stoppedOn(closing);
             } catch (RuntimeException failure) {
                 owner.getLogger().log(Level.FINE, "Не удалось вывести сообщение об остановке pnBans", failure);
             }
