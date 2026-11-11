@@ -3,29 +3,6 @@
   "product": "pnbans",
   "releases": [
     {
-      "version": "1.0.2",
-      "channel": "stable",
-      "description": "Новая ссылка поддержки в Discord.",
-      "changelogUrl": "https://github.com/PnFolder/pnBans/blob/main/.pnlibrary/changelogs/1.0.2.md",
-      "publishedAt": "2026-11-10T21:05:35Z",
-      "api": {
-        "minimum": 1,
-        "maximum": 1
-      },
-      "artifacts": [
-        {
-          "file": "pnBans-1.0.2.jar",
-          "platform": "BUKKIT",
-          "java": {
-            "minimum": 21
-          },
-          "url": "https://github.com/PnFolder/pnBans/releases/download/v1.0.2/pnBans-1.0.2.jar",
-          "sha256": "f1a96b586c1bdccd637a9c38737a7ab538d952a8c1f29f41092a15f750fdc28b",
-          "size": 21850746
-        }
-      ]
-    },
-    {
       "version": "1.0.1",
       "channel": "stable",
       "description": "Подключение к pnLibrary 0.0.1-dev.6: обновления, диагностика, метрики и единый журнал.",
