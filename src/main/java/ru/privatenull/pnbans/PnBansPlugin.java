@@ -31,7 +31,7 @@ import ru.privatenull.pnbans.listener.PunishmentListener;
 import ru.privatenull.pnbans.storage.PunishmentService;
 
 public final class PnBansPlugin extends JavaPlugin {
-    private static final String SUPPORT_URL = "https://discord.gg/jfjxY6Q57";
+    private static final String SUPPORT_URL = "https://discord.gg/rSxZAVW7uC";
 
     private DatabaseBackend database;
     private PunishmentService punishmentService;
