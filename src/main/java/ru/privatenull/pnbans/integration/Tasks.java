@@ -1,9 +1,9 @@
 package ru.privatenull.pnbans.integration;
 
 import org.pnfolder.pnlibrary.api.plugin.ModuleContext;
-import org.pnfolder.pnlibrary.api.tasks.TaskExecution;
+import org.pnfolder.pnlibrary.api.tasks.spec.TaskExecution;
 import org.pnfolder.pnlibrary.api.tasks.TaskHandle;
-import org.pnfolder.pnlibrary.api.tasks.TaskSpec;
+import org.pnfolder.pnlibrary.api.tasks.spec.TaskSpec;
 
 /**
  * Планировщик плагина поверх задач pnLibrary ({@code ModuleContext.tasks}): задачи выполняются на нужном потоке

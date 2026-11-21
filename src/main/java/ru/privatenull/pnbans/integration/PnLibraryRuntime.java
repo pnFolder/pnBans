@@ -2,7 +2,7 @@ package ru.privatenull.pnbans.integration;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pnfolder.pnlibrary.api.diagnostics.DiagnosticConfiguration;
-import org.pnfolder.pnlibrary.api.diagnostics.DiagnosticContainer;
+import org.pnfolder.pnlibrary.api.diagnostics.report.DiagnosticContainer;
 import org.pnfolder.pnlibrary.api.logging.MessageBox;
 import org.pnfolder.pnlibrary.api.plugin.ModuleContext;
 import org.pnfolder.pnlibrary.api.plugin.PluginRegistration;
@@ -11,9 +11,9 @@ import org.pnfolder.pnlibrary.api.remote.RemotePolicySettings;
 import org.pnfolder.pnlibrary.api.runtime.PnLibrary;
 import org.pnfolder.pnlibrary.api.runtime.PnLibraryIdentity;
 import org.pnfolder.pnlibrary.api.runtime.PnLibraryProvider;
-import org.pnfolder.pnlibrary.api.updates.UpdateChannel;
+import org.pnfolder.pnlibrary.api.updates.product.UpdateChannel;
 import org.pnfolder.pnlibrary.api.updates.UpdateRegistration;
-import org.pnfolder.pnlibrary.api.updates.UpdateSnapshot;
+import org.pnfolder.pnlibrary.api.updates.state.UpdateSnapshot;
 
 import java.util.Map;
 import java.util.function.Supplier;
